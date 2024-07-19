@@ -201,6 +201,7 @@ def lmds(est_map, adapt_ts, neg_ts, kernel_size):
 
 
 def process_maps(heatmap, clsmap, kernel_size=(3, 3), adapt_ts=100.0/255.0, neg_ts=0.1):
+    breakpoint()
     cls_scores = torch.softmax(clsmap, dim=1)[:, 1:, :, :]
     outmaps = torch.cat([heatmap, cls_scores], dim=1)
     batch_size, channels = outmaps.shape[:2]

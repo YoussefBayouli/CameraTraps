@@ -45,7 +45,8 @@ class BaseDetector(ABC):
         else:
             raise ValueError(
                 "Weights or URL must be provided for model loading.")
-        return self.process_checkpoint(checkpoint)
+        self.model = self.process_checkpoint(checkpoint)
+        pass
 
     @abstractmethod
     def process_checkpoint(self, checkpoint):
@@ -178,20 +179,22 @@ class HerdNetDetector(BaseDetector):
         Loads HerdNet model weights either from a local file or a URL.
         """
         from .herdnet.model import HerdNet
-
+        
         classes = checkpoint['classes']
         self.num_classes = len(classes) + 1
-
+        
         self.model = HerdNet(num_classes=self.num_classes,
-                             down_ratio=self.DOWN_RATIO)
+                             down_ratio=self.DOWN_RATIO, pretrained=False)
         state_dict = checkpoint['model_state_dict']
         new_state_dict = OrderedDict()
         # Remove the 'model.' prefix
         for k, v in state_dict.items():
             name = k[6:]
             new_state_dict[name] = v
+        
         self.model.load_state_dict(new_state_dict)
-        self.model = self.model.float().eval()
+        self.model = self.model.eval()
+        return self.model
 
     def single_image_detection(self, img, img_size=None, img_path=None, conf_thres=0.2, id_strip=None):
         """
@@ -245,6 +248,7 @@ class HerdNetDetector(BaseDetector):
         labels_np = np.array(labels[0]).astype(int).reshape(-1, 1)
 
         # Concatenate locations, detection scores, and labels
+        breakpoint()
         preds = np.concatenate([locs_np, dscores_np, labels_np], axis=1)
 
         # Generate and return the final results
